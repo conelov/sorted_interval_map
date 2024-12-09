@@ -1,0 +1,13 @@
+/cmake-build-*
+/cmake-*
+/build-*
+/bin
+/lib
+/.idea
+
+CMakeUserPresets.json
+
+*.user
+*.autosave
+*.exe
+*.~*
