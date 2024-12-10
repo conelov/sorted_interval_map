@@ -58,6 +58,34 @@ function(chc_target_common target)
 endfunction()
 
 
+function(chc_target_gtest target)
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
+  chc_assert_not_variable(BUILD_TESTING)
+
+  set(options_keywords MAIN MOCK MOCK_MAIN)
+  set(one_value_keywords)
+  set(multi_value_keywords)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
+
+  # https://github.com/cpm-cmake/CPM.cmake/tree/master/examples/gtest
+  chc_cpm(
+    NAME googletest
+    GITHUB_REPOSITORY google/googletest
+    VERSION ${${PROJECT_NAME}_GTEST_VERSION}
+    OPTIONS "INSTALL_GTEST OFF"
+  )
+
+  add_test(NAME ${name} COMMAND "$<TARGET_FILE:${name}>")
+
+  target_link_libraries(${name} PRIVATE
+    GTest::gtest
+    $<$<BOOL:arg_MAIN>:GTest::gtest_main>
+    $<$<BOOL:arg_MOCK>:GTest::gmock>
+    $<$<BOOL:arg_MOCK_MAIN>:GTest::gmock_main>
+  )
+endfunction()
+
+
 function(chc_target_qt target #[[source ...]])
   include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
   include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/private.cmake")

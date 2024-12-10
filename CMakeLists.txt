@@ -1,12 +1,16 @@
 cmake_minimum_required(VERSION 3.30)
-project(sorted_interval_map)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(cmake/head.cmake)
-chc_head_initialize_variable(${sorted_interval_map} sim)
+chc_project(sorted_interval_map
+  SHORT_NAME sim
+  LANGUAGES CXX
+  VERSION 0.1
+)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(BUILD_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
+
 chc_define_head_variable(STRING GTEST_VERSION 1.15.2)
 chc_define_head_variable(STRING GBENCH_VERSION 1.9.0)
 chc_define_head_variable(STRING BOOST_VERSION 1.86.0)
@@ -14,13 +18,16 @@ chc_define_head_variable(BOOL RESEARCH ON)
 chc_define_head_variable(BOOL RESEARCH_GBENCH_SAN OFF "Use sanitizers for benchmarking")
 
 if(PROJECT_IS_TOP_LEVEL)
-  chc_define_head_variable(STRING SANITIZERS "address;thread;ub;leak;mem" "Add this sanitizers per targets. [address;thread;ub;leak;mem]" sanitizers_list)
+  chc_define_head_variable(STRING SANITIZERS "address;thread;ub;leak;mem" "Add this sanitizers per targets. [address;thread;ub;leak;mem]")
 endif()
 
 if(BUILD_TESTING)
-  if(NOT "${sanitizers_list}" STREQUAL "" AND NOT BUILD_SHARED_LIBS)
+  if(NOT "${SIM_SANITIZERS}" STREQUAL "" AND NOT BUILD_SHARED_LIBS)
     message(STATUS "BUILD_SHARED_LIBS needed for sanitize. Forced enabled.")
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
   endif()
   enable_testing()
 endif()
+
+
+add_subdirectory(sim)
