@@ -33,10 +33,12 @@ function(chc_target_common target)
     LINKER_LANGUAGE CXX
   )
 
-  target_compile_definitions(${target} PRIVATE
+  target_compile_definitions(${target}
+    PRIVATE
     PROJECT_NAME="${PROJECT_NAME}"
     PROJECT_VERSION=${PROJECT_VERSION}
-    CH_CXX_COMPILER_FRONTEND_${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}
+    PUBLIC
+    ${PROJECT_NAME_SHORT_UP}_CXX_COMPILER_FRONTEND_${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}
   )
 
   include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/private.cmake")
@@ -63,15 +65,17 @@ function(chc_target_gtest target)
   chc_assert_not_variable(BUILD_TESTING)
 
   set(options_keywords MAIN MOCK MOCK_MAIN)
-  set(one_value_keywords)
+  set(one_value_keywords VERSION)
   set(multi_value_keywords)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
+
+  chc_set_if(arg_VERSION EMPTY THEN GTEST_VERSION HEAD)
 
   # https://github.com/cpm-cmake/CPM.cmake/tree/master/examples/gtest
   chc_cpm(
     NAME googletest
     GITHUB_REPOSITORY google/googletest
-    VERSION ${${PROJECT_NAME}_GTEST_VERSION}
+    VERSION ${arg_VERSION}
     OPTIONS "INSTALL_GTEST OFF"
   )
 
@@ -83,6 +87,36 @@ function(chc_target_gtest target)
     $<$<BOOL:arg_MOCK>:GTest::gmock>
     $<$<BOOL:arg_MOCK_MAIN>:GTest::gmock_main>
   )
+endfunction()
+
+
+function(chc_target_boost target)
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
+
+  set(options_keywords)
+  set(one_value_keywords VERSION)
+  set(multi_value_keywords LINK PUBLIC)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
+
+  chc_set_if(arg_VERSION EMPTY THEN BOOST_VERSION HEAD)
+
+  # https://github.com/cpm-cmake/CPM.cmake/blob/master/examples/boost/CMakeLists.txt
+  set(BOOST_INCLUDE_LIBRARIES ${arg_LINK} ${arg_PUBLIC})
+  chc_assert_not_str_empty(BOOST_INCLUDE_LIBRARIES)
+  chc_cpm(
+    NAME Boost
+    VERSION ${arg_VERSION}
+    URL https://github.com/boostorg/boost/releases/download/boost-${arg_VERSION}/boost-${arg_VERSION}-cmake.tar.xz
+    OPTIONS "BOOST_ENABLE_CMAKE ON"
+  )
+
+  foreach(i IN LISTS arg_LINK)
+    target_link_libraries(${target} PRIVATE Boost::${i})
+  endforeach()
+
+  foreach(i IN LISTS arg_PUBLIC)
+    target_link_libraries(${target} PUBLIC Boost::${i})
+  endforeach()
 endfunction()
 
 

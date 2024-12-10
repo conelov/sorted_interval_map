@@ -21,7 +21,9 @@ macro(chc_project)
 endmacro()
 
 
-function(chc_define_head_variable type name value #[[doc = ""]] #[[result_var = "last_head_var"]])
+function(chc_head_define_variable type name value #[[doc = ""]] #[[result_var = "last_head_var"]])
+  chcaux_head_check()
+
   foreach(prefix PROJECT_NAME_UP PROJECT_NAME_SHORT_UP)
     set(var ${${prefix}}_${name})
     if(DEFINED ${var} OR DEFINED CACHE{${var}})
@@ -42,8 +44,33 @@ function(chc_define_head_variable type name value #[[doc = ""]] #[[result_var = 
 endfunction()
 
 
-function(chcaux_head_check)
+function(chc_head_variable var result_var #[[project = ${PROJECT_NAME}]])
+  if(${ARGC} GREATER 2)
+    set(project ${ARGV2})
+  else()
+    chcaux_head_check()
+    set(project ${PROJECT_NAME})
+  endif()
+
+  set(var_head ${project}_${var})
+  if(NOT DEFINED CACHE{${var_head}})
+    message(FATAL_ERROR "Undefined head variable: ${var_head}")
+  endif()
+
+  set(${result_var} "${${var_head}}" PARENT_SCOPE)
+endfunction()
+
+
+function(chcaux_head_check #[[result_var]])
   if(NOT DEFINED PROJECT_NAME OR NOT CHCAUX_HEAD_LOADED_FOR_${PROJECT_NAME})
-    message(FATAL_ERROR "Call chc_project() from '${CMAKE_CURRENT_FUNCTION_LIST_FILE}' in project root.")
+    if(${ARGC} GREATER 0)
+      set(${ARGV0} FALSE PARENT_SCOPE)
+    else()
+      message(FATAL_ERROR "Call chc_project() from '${CMAKE_CURRENT_FUNCTION_LIST_FILE}' in project root.")
+    endif()
+    return()
+  endif()
+  if(${ARGC} GREATER 0)
+    set(${ARGV0} TRUE PARENT_SCOPE)
   endif()
 endfunction()

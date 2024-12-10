@@ -43,21 +43,29 @@ endmacro()
 
 
 macro(chc_set_if var)
-  set(options_keywords NOT EMPTY "PARENT_SCOPE")
-  set(one_value_keywords SET VALUE)
+  set(options_keywords NOT EMPTY "PARENT_SCOPE" HEAD)
+  set(one_value_keywords SET THEN)
   set(multi_value_keywords)
-  cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
-  chc_assert_incomparable_arguments(arg_SET arg_VALUE)
+  cmake_parse_arguments(arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}" ${ARGN})
+  chc_assert_incomparable_arguments(arg_SET arg_THEN)
+  chc_assert_incomparable_arguments(arg_SET arg_HEAD)
 
   set(if_condition_cmd "${var}")
   if(arg_EMPTY)
-    set(if_condition_cmd "\"${${var}}\" STREQUAL " "")
+    set(if_condition_cmd "\"${${var}}\" STREQUAL \"\"")
   endif()
   if(arg_NOT)
     set(if_condition_cmd "NOT ${if_condition_cmd}")
   endif()
 
-  set(set_cmd "set(${var} \"${arg_VALUE}\")")
+  if(arg_HEAD)
+    chcaux_head_check()
+    chc_head_variable(${arg_THEN} head_value)
+    set(set_cmd "set(${var} \"${head_value}\")")
+  else()
+    set(set_cmd "set(${var} \"${arg_THEN}\")")
+  endif()
+
   if(NOT "${arg_SET}" STREQUAL "")
     set(set_cmd "${arg_SET} \"${${var}}\"")
   endif()
@@ -65,9 +73,11 @@ macro(chc_set_if var)
     set(set_cmd "${set_cmd} PARENT_SCOPE")
   endif()
 
+  cmake_language(EVAL CODE "
   if(${if_condition_cmd})
-    cmake_language(EVAL CODE "${set_cmd}")
+    cmake_language(EVAL CODE \"${set_cmd}\")
   endif()
+  ")
 endmacro()
 
 

@@ -7,3 +7,4 @@ add_library(${name}
 )
 
 chc_target_common(${name} UT)
+#chc_target_boost(${name} LINK PUBLIC hana)

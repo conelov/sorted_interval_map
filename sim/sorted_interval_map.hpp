@@ -1,18 +1,22 @@
 #pragma once
 
+#include <unordered_map>
+
 
 namespace sim {
 
 
-template<typename K_, typename V_, template<typename, typename> class VAggregator_ = std::pair>
+template<
+  typename K_,
+  typename V_,
+  typename Comparator_,
+  template<typename, typename> class VAggregator_ = std::pair>
 class SortedIntervalMap {
 public:
-  using K = K_;
-  using V = V_;
-  using VPair = VAggregator_<V, V>;
-
-public:
-
+  using K           = K_;
+  using V           = V_;
+  using Comparator  = Comparator_;
+  using VAggregator = VAggregator_;
 };
 
 
