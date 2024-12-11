@@ -2,6 +2,7 @@ chc_target_auto_name()
 
 add_executable(${name}
   SortedInterval.cpp
+  SortedIntervalMap.cpp
 )
 
 target_link_libraries(${name} PRIVATE

@@ -270,7 +270,9 @@ TAB_SIZE               = 4
 # a double escape (\\{ and \\})
 
 ALIASES                =
-ALIASES                += "complexity=\par complexity big O:"
+ALIASES                += "complexity=\par Worst case complexity (O):"
+ALIASES                += "complexity_best=\par Best case complexity (Ω):"
+ALIASES                += "complexity_ave=\par Average case complexity (Θ):"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources
 # only. Doxygen will then generate output that is more tailored for C. For
