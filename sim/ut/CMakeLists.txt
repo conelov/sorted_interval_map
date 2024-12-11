@@ -1,7 +1,7 @@
 chc_target_auto_name()
 
 add_executable(${name}
-  smoke.cpp
+  SortedInterval.cpp
 )
 
 target_link_libraries(${name} PRIVATE
@@ -9,4 +9,4 @@ target_link_libraries(${name} PRIVATE
 )
 
 chc_target_common(${name})
-chc_target_gtest(${name} MAIN)
+chc_target_gtest(${name} GMOCK_MAIN)

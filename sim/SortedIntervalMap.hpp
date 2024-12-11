@@ -2,6 +2,8 @@
 
 #include <unordered_map>
 
+#include <sim/SortedInterval.hpp>
+
 
 namespace sim {
 
