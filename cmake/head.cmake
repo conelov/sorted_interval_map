@@ -2,7 +2,7 @@ include_guard(DIRECTORY)
 
 
 macro(chc_project)
-  set(options_keywords)
+  set(options_keywords NO_EXTRA)
   set(one_value_keywords SHORT_NAME)
   set(multi_value_keywords)
   cmake_parse_arguments(arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}" ${ARGN})
@@ -18,7 +18,17 @@ macro(chc_project)
   string(TOUPPER "${PROJECT_NAME_SHORT}" PROJECT_NAME_SHORT_UP)
 
   set(CHCAUX_HEAD_LOADED_FOR_${PROJECT_NAME} ON)
+
+  if(NOT arg_NO_EXTRA)
+    chcaxu_project_extra()
+  endif()
 endmacro()
+
+
+function(chcaxu_project_extra)
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
+  chc_doxygen_auto()
+endfunction()
 
 
 function(chc_head_define_variable type name value #[[doc = ""]] #[[result_var = "last_head_var"]])

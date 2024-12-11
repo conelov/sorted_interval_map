@@ -292,3 +292,74 @@ function(chc_defer_fn_bind callback_fn_var)
     set(${arg_ID_VAR} "${${arg_ID_VAR}}" PARENT_SCOPE)
   endif()
 endfunction()
+
+
+function(chc_doxygen)
+  chcaux_head_check()
+
+  set(options_keywords NO_CONFIGURED_DOXYFILE REQUIRED)
+  set(one_value_keywords SCAN_DIRECTORY DOXYFILE OUTPUT)
+  set(multi_value_keywords)
+  cmake_parse_arguments(PARSE_ARGV 0 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
+
+  chc_set_if(arg_OUTPUT EMPTY THEN "${PROJECT_BINARY_DIR}/docs")
+
+  chc_set_if(arg_DOXYFILE EMPTY THEN "${PROJECT_SOURCE_DIR}/Doxyfile.in")
+  if(NOT EXISTS "${arg_DOXYFILE}")
+    message(FATAL_ERROR "Doxyfile not exist.")
+  endif()
+
+  if(NOT arg_NO_CONFIGURED_DOXYFILE)
+    cmake_path(SET doxy_file NORMALIZE "${arg_OUTPUT}/Doxyfile")
+    configure_file("${arg_DOXYFILE}" "${doxy_file}" @ONLY)
+    cmake_path(SET arg_DOXYFILE NORMALIZE "${doxy_file}")
+  endif()
+
+  chc_set_if(arg_SCAN_DIRECTORY EMPTY THEN "${PROJECT_SOURCE_DIR}/${PROJECT_NAME_SHORT}")
+
+  if(arg_REQUIRED)
+    find_package(Doxygen REQUIRED)
+  else()
+    find_package(Doxygen)
+    if(NOT Doxygen_FOUND)
+      return()
+    endif()
+  endif()
+
+  cmake_path(SET html_index_path NORMALIZE "${arg_OUTPUT}/html/index.html")
+  add_custom_target(${PROJECT_NAME_SHORT}-doxygen_generate
+    COMMAND "${DOXYGEN_EXECUTABLE}" "${arg_DOXYFILE}"
+    DEPENDS "${arg_DOXYFILE}"
+    BYPRODUCTS "${html_index_path}"
+    WORKING_DIRECTORY "${arg_SCAN_DIRECTORY}"
+    COMMENT "Generating documentation with doxygen."
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+  )
+
+  foreach(i chromium firefox)
+    find_program(browser_exe ${i})
+    if(browser_exe-NOTFOUND)
+      continue()
+    endif()
+
+    add_custom_target(${PROJECT_NAME_SHORT}-doxygen_show
+      COMMAND "${browser_exe}" "${html_index_path}"
+      DEPENDS "${html_index_path}"
+    )
+    break()
+  endforeach()
+endfunction()
+
+
+function(chc_doxygen_auto)
+  cmake_path(SET doxy_path "${PROJECT_SOURCE_DIR}/Doxyfile")
+  if(EXISTS "${doxy_path}")
+    chc_doxygen(NO_CONFIGURED_DOXYFILE)
+  else()
+    cmake_path(SET doxy_path "${PROJECT_SOURCE_DIR}/Doxyfile.in")
+    if(EXISTS "${doxy_path}")
+      chc_doxygen()
+    endif()
+  endif()
+endfunction()
