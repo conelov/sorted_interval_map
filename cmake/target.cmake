@@ -1,4 +1,4 @@
-include_guard(DIRECTORY)
+include_guard(GLOBAL)
 
 
 function(chc_target_auto_name #[[result_var = name]])
@@ -65,27 +65,36 @@ function(chc_target_gtest target)
   chc_assert_not_variable(BUILD_TESTING)
 
   set(options_keywords MAIN MOCK MOCK_MAIN)
-  set(one_value_keywords VERSION)
+  set(one_value_keywords)
   set(multi_value_keywords)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
 
-  chc_set_if(arg_VERSION EMPTY THEN GTEST_VERSION HEAD)
-
-  # https://github.com/cpm-cmake/CPM.cmake/tree/master/examples/gtest
-  chc_cpm(
-    NAME googletest
-    GITHUB_REPOSITORY google/googletest
-    VERSION ${arg_VERSION}
-    OPTIONS "INSTALL_GTEST OFF"
-  )
-
-  add_test(NAME ${name} COMMAND "$<TARGET_FILE:${name}>")
-
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/cpm.cmake")
+  chc_cpm_gtest()
   target_link_libraries(${name} PRIVATE
     GTest::gtest
     $<$<BOOL:arg_MAIN>:GTest::gtest_main>
     $<$<BOOL:arg_MOCK>:GTest::gmock>
     $<$<BOOL:arg_MOCK_MAIN>:GTest::gmock_main>
+  )
+  add_test(NAME ${name} COMMAND "$<TARGET_FILE:${name}>")
+endfunction()
+
+
+function(chc_target_gbench target)
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/cpm.cmake")
+  chc_cpm_gbench()
+  target_link_libraries(${name} PRIVATE
+    benchmark::benchmark
+  )
+endfunction()
+
+
+function(chc_target_itlib target)
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/cpm.cmake")
+  chc_cpm_itlib()
+  target_link_libraries(${name} PRIVATE
+    itlib::itlib
   )
 endfunction()
 
@@ -100,15 +109,10 @@ function(chc_target_boost target)
 
   chc_set_if(arg_VERSION EMPTY THEN BOOST_VERSION HEAD)
 
-  # https://github.com/cpm-cmake/CPM.cmake/blob/master/examples/boost/CMakeLists.txt
   set(BOOST_INCLUDE_LIBRARIES ${arg_LINK} ${arg_PUBLIC})
   chc_assert_not_str_empty(BOOST_INCLUDE_LIBRARIES)
-  chc_cpm(
-    NAME Boost
-    VERSION ${arg_VERSION}
-    URL https://github.com/boostorg/boost/releases/download/boost-${arg_VERSION}/boost-${arg_VERSION}-cmake.tar.xz
-    OPTIONS "BOOST_ENABLE_CMAKE ON"
-  )
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/cpm.cmake")
+  chc_cpm_boost(${BOOST_INCLUDE_LIBRARIES})
 
   foreach(i IN LISTS arg_LINK)
     target_link_libraries(${target} PRIVATE Boost::${i})

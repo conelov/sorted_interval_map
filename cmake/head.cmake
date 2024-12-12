@@ -54,20 +54,31 @@ function(chc_head_define_variable type name value #[[doc = ""]] #[[result_var = 
 endfunction()
 
 
-function(chc_head_variable var result_var #[[project = ${PROJECT_NAME}]])
-  if(${ARGC} GREATER 2)
-    set(project ${ARGV2})
-  else()
-    chcaux_head_check()
-    set(project ${PROJECT_NAME})
+function(chc_head_variable var)
+  set(options_keywords QUIT)
+  set(one_value_keywords PROJECT RESULT_VAR)
+  set(multi_value_keywords)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
+
+  if("${arg_RESULT_VAR}" STREQUAL "")
+    set(arg_RESULT_VAR ${var})
   endif()
 
-  set(var_head ${project}_${var})
+  if("${arg_PROJECT}" STREQUAL "")
+    set(arg_PROJECT ${PROJECT_NAME})
+  endif()
+
+  set(var_head ${arg_PROJECT}_${var})
   if(NOT DEFINED CACHE{${var_head}})
-    message(FATAL_ERROR "Undefined head variable: ${var_head}")
+    if(arg_QUIT)
+      unset(${arg_RESULT_VAR} PARENT_SCOPE)
+      return()
+    else()
+      message(FATAL_ERROR "Undefined head variable: ${var_head}")
+    endif()
   endif()
 
-  set(${result_var} "${${var_head}}" PARENT_SCOPE)
+  set(${arg_RESULT_VAR} "${${var_head}}" PARENT_SCOPE)
 endfunction()
 
 

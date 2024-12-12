@@ -7,5 +7,14 @@ add_library(${name}
   SortedIntervalMap.hpp
 )
 
-chc_target_common(${name} UT)
-#chc_target_boost(${name} LINK PUBLIC container)
+chc_target_common(${name})
+
+
+chc_head_variable(RESEARCH)
+if(RESEARCH)
+  add_subdirectory(research)
+endif()
+
+if(BUILD_TESTING)
+  add_subdirectory(ut)
+endif()

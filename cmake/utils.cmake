@@ -60,7 +60,7 @@ macro(chc_set_if var)
 
   if(arg_HEAD)
     chcaux_head_check()
-    chc_head_variable(${arg_THEN} head_value)
+    chc_head_variable(${arg_THEN} RESULT_VAR head_value)
     set(set_cmd "set(${var} \"${head_value}\")")
   else()
     set(set_cmd "set(${var} \"${arg_THEN}\")")
@@ -169,31 +169,6 @@ function(chc_download_file url to)
 endfunction()
 
 
-function(chc_cpm #[[CPMAddPackage ...]])
-  set(cpm_folder_var ${CMAKE_CURRENT_FUNCTION}_cpm_folder)
-  if(NOT DEFINED CACHE{${cpm_folder_var}})
-    set(dest "${CPM_SOURCE_CACHE}")
-    if("${dest}" STREQUAL "")
-      set(dest "$ENV{CPM_SOURCE_CACHE}")
-    endif()
-    if("${dest}" STREQUAL "")
-      set(dest "${CMAKE_BINARY_DIR}/cpm_repo")
-      set(CPM_SOURCE_CACHE "${dest}" CACHE STRING "")
-    endif()
-    set(${cpm_folder_var} "${dest}" CACHE INTERNAL "")
-  endif()
-
-  set(file CPM.cmake)
-  cmake_path(SET cpm_file NORMALIZE "${${cpm_folder_var}}/${file}")
-  chc_download_file(https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.40.2/CPM.cmake "${cpm_file}")
-
-  option(CPM_USE_NAMED_CACHE_DIRECTORIES "" ON)
-  option(CPM_USE_LOCAL_PACKAGES "" ON)
-  include("${cpm_file}")
-  CPMAddPackage(${ARGN}) # https://github.com/cpm-cmake/CPM.cmake
-endfunction()
-
-
 function(chc_resolve_instrument_per_library instrument #[[result_path_var = ${instrument}_path]] #[[result_dir_var = ${instrument}_dir]])
   set(result_path_var ${instrument}_path)
   if(${ARGC} GREATER 1)
@@ -259,7 +234,7 @@ function(chc_switch_case_fn cond_var #[[<CASE key call fn> ...]])
 endfunction()
 
 
-function(chc_defer_fn_bind callback_fn_var)
+function(chc_defer_fn callback_fn_var)
   set(options_keywords NO_DIRECTORY)
   set(one_value_keywords DIRECTORY ID_VAR)
   set(multi_value_keywords)
@@ -273,15 +248,11 @@ function(chc_defer_fn_bind callback_fn_var)
   endif()
 
   if(NOT arg_NO_DIRECTORY)
-    if(arg_DIRECTORY STREQUAL "")
-      set(dir "${CMAKE_CURRENT_SOURCE_DIR}")
-    else()
-      set(dir "${arg_DIRECTORY}")
-    endif()
-    list(PREPEND defer_cmd DIRECTORY "\"${dir}\"")
+    chc_set_if(arg_DIRECTORY EMPTY THEN "${CMAKE_CURRENT_SOURCE_DIR}")
+    list(PREPEND defer_cmd DIRECTORY "\"${arg_DIRECTORY}\"")
   endif()
 
-  if(NOT arg_ID_VAR STREQUAL "")
+  if(NOT "${arg_ID_VAR}" STREQUAL "")
     list(PREPEND defer_cmd ID_VAR ${arg_ID_VAR})
   endif()
 
@@ -291,6 +262,18 @@ function(chc_defer_fn_bind callback_fn_var)
   if(NOT arg_ID_VAR STREQUAL "")
     set(${arg_ID_VAR} "${${arg_ID_VAR}}" PARENT_SCOPE)
   endif()
+endfunction()
+
+
+function(chc_defer_code code #[[chc_defer_fn args ...]])
+  string(MD5 defer_fn "${code}")
+  set(defer_fn ${CMAKE_CURRENT_FUNCTION}_${defer_fn})
+  function(${defer_fn})
+    set(code "${ARGN}")
+    chc_list_unpack(code "")
+    cmake_language(EVAL CODE "${code}")
+  endfunction()
+  chc_defer_fn(${defer_fn} \""${code}\"" ${ARGN})
 endfunction()
 
 
