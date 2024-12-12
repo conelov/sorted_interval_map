@@ -7,14 +7,13 @@ add_library(${name}
   SortedIntervalMap.hpp
 )
 
-chc_target_common(${name})
 
+add_subdirectory(fixture)
 
 chc_head_variable(RESEARCH)
 if(RESEARCH)
   add_subdirectory(research)
 endif()
 
-if(BUILD_TESTING)
-  add_subdirectory(ut)
-endif()
+
+chc_target_common(${name} UT)

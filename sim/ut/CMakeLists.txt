@@ -7,6 +7,7 @@ add_executable(${name}
 
 target_link_libraries(${name} PRIVATE
   ${PROJECT_NAME_SHORT}
+  ${PROJECT_NAME_SHORT}-fixture
 )
 
 chc_target_common(${name})

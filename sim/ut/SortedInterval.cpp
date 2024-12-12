@@ -1,43 +1,54 @@
-// #include <boost/container/flat_set.hpp>
-
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
 #include <sim/SortedInterval.hpp>
 
-
-using namespace ::testing;
-using namespace sim;
+#include <sim/fixture/SortedInterval.hpp>
 
 
-TEST(SortedInterval, smoke) {
-  SortedInterval<int /*, boost::container::flat_set*/> sorted_interval;
+template<typename SortedInterval_>
+class SortedIntervalTest
+    : public ::testing::Test
+    , public sim::fix::SortedInterval<SortedInterval_> {
+protected:
+  void SetUp() override {
+    this->pre_iteration();
+  }
+};
+
+
+TYPED_TEST_SUITE(
+  SortedIntervalTest,
+  ::testing::Types<sim::SortedInterval<int /*, boost::container::flat_set*/>>);
+
+
+TYPED_TEST(SortedIntervalTest, smoke) {
   {
-    decltype(sorted_interval)::container_type::const_iterator it;
-    ASSERT_NO_THROW(it = sorted_interval.emplace(std::pair{1, 1}));
+    typename decltype(this->sorted_interval)::container_type::const_iterator it;
+    ASSERT_NO_THROW(it = this->sorted_interval.emplace(std::pair{1, 1}));
     ASSERT_EQ(*it, (std::pair{1, 1}));
   }
-  ASSERT_EQ(sorted_interval.size(), 1);
-  ASSERT_TRUE(sorted_interval.contains(std::pair{1, 1}));
+  ASSERT_EQ(this->sorted_interval.size(), 1);
+  ASSERT_TRUE(this->sorted_interval.contains(std::pair{1, 1}));
 
-  ASSERT_NO_THROW(sorted_interval.emplace(std::pair{1, 1}));
-  ASSERT_EQ(sorted_interval.size(), 1);
-  ASSERT_TRUE(sorted_interval.contains(std::pair{1, 1}));
+  ASSERT_NO_THROW(this->sorted_interval.emplace(std::pair{1, 1}));
+  ASSERT_EQ(this->sorted_interval.size(), 1);
+  ASSERT_TRUE(this->sorted_interval.contains(std::pair{1, 1}));
 
-  ASSERT_NO_THROW(sorted_interval.emplace(std::pair{2, 2}));
-  ASSERT_EQ(sorted_interval.size(), 2);
-  ASSERT_TRUE(sorted_interval.contains(std::pair{1, 1}));
-  ASSERT_TRUE(sorted_interval.contains(std::pair{2, 2}));
+  ASSERT_NO_THROW(this->sorted_interval.emplace(std::pair{2, 2}));
+  ASSERT_EQ(this->sorted_interval.size(), 2);
+  ASSERT_TRUE(this->sorted_interval.contains(std::pair{1, 1}));
+  ASSERT_TRUE(this->sorted_interval.contains(std::pair{2, 2}));
 
-  ASSERT_NO_THROW(sorted_interval.emplace(std::pair{2, 3}));
-  ASSERT_EQ(sorted_interval.size(), 2);
-  ASSERT_TRUE(sorted_interval.contains(std::pair{1, 1}));
-  ASSERT_TRUE(sorted_interval.contains(std::pair{2, 3}));
+  ASSERT_NO_THROW(this->sorted_interval.emplace(std::pair{2, 3}));
+  ASSERT_EQ(this->sorted_interval.size(), 2);
+  ASSERT_TRUE(this->sorted_interval.contains(std::pair{1, 1}));
+  ASSERT_TRUE(this->sorted_interval.contains(std::pair{2, 3}));
 
-  ASSERT_NO_THROW(sorted_interval.emplace(std::pair{1, 2}));
-  ASSERT_EQ(sorted_interval.size(), 1);
-  ASSERT_TRUE(sorted_interval.contains(std::pair{1, 3}));
+  ASSERT_NO_THROW(this->sorted_interval.emplace(std::pair{1, 2}));
+  ASSERT_EQ(this->sorted_interval.size(), 1);
+  ASSERT_TRUE(this->sorted_interval.contains(std::pair{1, 3}));
 
-  sorted_interval.clear();
-  ASSERT_EQ(sorted_interval.size(), 0);
+  this->sorted_interval.clear();
+  ASSERT_EQ(this->sorted_interval.size(), 0);
 }
