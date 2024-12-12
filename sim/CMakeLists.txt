@@ -3,7 +3,7 @@ include("${PROJECT_SOURCE_DIR}/cmake/target.cmake")
 chc_target_auto_name()
 
 add_library(${name}
-  SortedInterval.hpp
+  SortedInterval.hpp aux/SortedIntervalImpl.hpp
   SortedIntervalMap.hpp
 )
 
