@@ -30,12 +30,11 @@ function(chc_cpm #[[CPMAddPackage ...]])
   option(CPM_USE_NAMED_CACHE_DIRECTORIES "" ON)
   option(CPM_USE_LOCAL_PACKAGES "" ON)
   include("${cpm_file}")
-  CPMAddPackage(${ARGN}) # https://github.com/cpm-cmake/CPM.cmake
+  CPMFindPackage(${ARGN}) # https://github.com/cpm-cmake/CPM.cmake
 endfunction()
 
 
 function(chc_cpm_gtest)
-  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
   chc_head_variable(GTEST_VERSION)
   # https://github.com/cpm-cmake/CPM.cmake/tree/master/examples/gtest
   chc_cpm(
@@ -48,7 +47,6 @@ endfunction()
 
 
 function(chc_cpm_gbench)
-  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
   chc_head_variable(GBECNH_VERSION)
   # https://github.com/cpm-cmake/CPM.cmake/blob/master/examples/benchmark
   chc_cpm(
@@ -61,7 +59,6 @@ endfunction()
 
 
 function(chc_cpm_itlib)
-  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
   chc_head_variable(ITLIB_VERSION)
   chc_cpm(
     NAME itlib
@@ -77,8 +74,8 @@ function(chc_cpm_boost BOOST_INCLUDE_LIBRARIES)
   chc_head_variable(BOOST_VERSION)
   chc_cpm(
     NAME Boost
-    GITHUB_REPOSITORY boostorg/boost
     VERSION ${BOOST_VERSION}
+    URL https://github.com/boostorg/boost/releases/download/boost-${BOOST_VERSION}/boost-${BOOST_VERSION}-cmake.tar.gz
     OPTIONS "BOOST_ENABLE_CMAKE ON"
   )
 endfunction()

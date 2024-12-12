@@ -5,9 +5,11 @@ add_executable(${name}
   SortedIntervalMap.cpp
 )
 
+chc_head_variable(RESEARCH)
 target_link_libraries(${name} PRIVATE
   ${PROJECT_NAME_SHORT}
   ${PROJECT_NAME_SHORT}-fixture
+  $<$<BOOL:${RESEARCH}>:${PROJECT_NAME_SHORT}-research>
 )
 
 chc_target_common(${name})

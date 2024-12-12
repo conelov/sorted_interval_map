@@ -1,3 +1,7 @@
+#ifdef SIM_RESEARCH
+  #include <itlib/flat_set.hpp>
+#endif
+
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
@@ -17,9 +21,16 @@ protected:
 };
 
 
-TYPED_TEST_SUITE(
-  SortedIntervalTest,
-  ::testing::Types<sim::SortedInterval<int /*, boost::container::flat_set*/>>);
+// clang-format off
+using Types = ::testing::Types<
+  sim::SortedInterval<int>
+#ifdef SIM_RESEARCH
+  , sim::SortedInterval<int, std::less, itlib::flat_set, std::vector>
+#endif
+>;
+// clang-format on
+
+TYPED_TEST_SUITE(SortedIntervalTest, Types);
 
 
 TYPED_TEST(SortedIntervalTest, smoke) {

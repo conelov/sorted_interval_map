@@ -24,7 +24,7 @@ public:
   using allocator_type      = Allocator_<interval_type>;
 
 private:
-  struct IntervalComparator final {
+  struct IntervalComparator {
     using is_transparent = void;
 
     constexpr bool operator()(interval_type const& lhs, interval_type const& rhs) const {
@@ -48,7 +48,7 @@ public:
   /// @complexity n
   constexpr typename container_type::const_iterator emplace(auto&& interval) {
     auto& [start, end] = interval;
-    auto it           = ranges_.lower_bound(start);
+    auto it            = ranges_.lower_bound(start);
     if (it != ranges_.begin() && std::prev(it)->second >= start) {
       --it;
     }
@@ -71,8 +71,17 @@ public:
 
 
   /// @complexity log n
+  [[nodiscard]] constexpr typename container_type::const_iterator find(auto&& key) const {
+    static_assert(std::is_same_v<std::remove_cvref_t<decltype(key)>, interval_type>);
+    if (auto const it = ranges_.find(std::forward<decltype(key)>(key)); it != ranges_.cend()) {
+      return it;
+    }
+    return ranges_.cend();
+  }
+
+  /// @complexity log n
   [[nodiscard]] constexpr bool contains(auto&& interval) const {
-    return ranges_.contains(std::forward<decltype(interval)>(interval));
+    return find(std::forward<decltype(interval)>(interval)) != ranges_.cend();
   }
 
 

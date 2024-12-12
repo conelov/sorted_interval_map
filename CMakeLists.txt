@@ -13,7 +13,7 @@ option(BUILD_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
 
 chc_head_define_variable(STRING GTEST_VERSION 1.15.2)
 chc_head_define_variable(STRING GBENCH_VERSION 1.9.0)
-chc_head_define_variable(STRING BOOST_VERSION 1.86.0)
+chc_head_define_variable(STRING BOOST_VERSION 1.87.0)
 chc_head_define_variable(STRING ITLIB_VERSION 1.11.4)
 chc_head_define_variable(BOOL RESEARCH ON)
 chc_head_define_variable(BOOL RESEARCH_GBENCH_SAN OFF "Use sanitizers for benchmarking")
