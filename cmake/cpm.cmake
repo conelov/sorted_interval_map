@@ -47,12 +47,12 @@ endfunction()
 
 
 function(chc_cpm_gbench)
-  chc_head_variable(GBECNH_VERSION)
+  chc_head_variable(GBENCH_VERSION)
   # https://github.com/cpm-cmake/CPM.cmake/blob/master/examples/benchmark
   chc_cpm(
     NAME benchmark
     GITHUB_REPOSITORY google/benchmark
-    VERSION ${GBECNH_VERSION}
+    VERSION ${GBENCH_VERSION}
     OPTIONS "BENCHMARK_ENABLE_TESTING OFF"
   )
 endfunction()

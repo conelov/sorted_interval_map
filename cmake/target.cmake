@@ -73,19 +73,25 @@ function(chc_target_gtest target)
   chc_cpm_gtest()
   target_link_libraries(${name} PRIVATE
     GTest::gtest
-    $<$<BOOL:arg_MAIN>:GTest::gtest_main>
-    $<$<BOOL:arg_MOCK>:GTest::gmock>
-    $<$<BOOL:arg_MOCK_MAIN>:GTest::gmock_main>
+    $<$<BOOL:${arg_MAIN}>:GTest::gtest_main>
+    $<$<BOOL:${arg_MOCK}>:GTest::gmock>
+    $<$<BOOL:${arg_MOCK_MAIN}>:GTest::gmock_main>
   )
   add_test(NAME ${name} COMMAND "$<TARGET_FILE:${name}>")
 endfunction()
 
 
 function(chc_target_gbench target)
+  set(options_keywords MAIN)
+  set(one_value_keywords)
+  set(multi_value_keywords)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
+
   include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/cpm.cmake")
   chc_cpm_gbench()
   target_link_libraries(${name} PRIVATE
     benchmark::benchmark
+    $<$<BOOL:${arg_MAIN}>:benchmark::benchmark_main>
   )
 endfunction()
 

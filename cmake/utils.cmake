@@ -346,3 +346,20 @@ function(chc_doxygen_auto)
     endif()
   endif()
 endfunction()
+
+
+function(chc_cpu_count out_var)
+  set(cpu_count_var ${CMAKE_CURRENT_FUNCTION}-cpu_count)
+  if(NOT DEFINED CACHE{${cpu_count_var}})
+    if(UNIX)
+      execute_process(COMMAND sh -c nproc
+        OUTPUT_VARIABLE c
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    else()
+      message(FATAL_ERROR "No implementation.")
+    endif()
+    set(${cpu_count_var} ${c} CACHE INTERNAL "")
+  endif()
+  set(${out_var} ${${cpu_count_var}} PARENT_SCOPE)
+endfunction()

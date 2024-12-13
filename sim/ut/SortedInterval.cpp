@@ -16,7 +16,7 @@ class SortedIntervalTest
     , public sim::fix::SortedInterval<SortedInterval_> {
 protected:
   void SetUp() override {
-    this->pre_iteration();
+    this->pre_iterations();
   }
 };
 

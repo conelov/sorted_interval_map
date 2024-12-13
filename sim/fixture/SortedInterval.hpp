@@ -10,7 +10,7 @@ public:
   virtual ~SortedInterval() = default;
 
 protected:
-  virtual void pre_iteration() {
+  virtual void pre_iterations() {
     sorted_interval.clear();
   }
 
