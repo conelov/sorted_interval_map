@@ -38,18 +38,18 @@ public:
   }
 
 
-  Average const& average() const noexcept {
+  [[nodiscard]] Average const& average() const noexcept {
     return ir_;
   }
 
 
-  Average const* operator->() const noexcept {
+  [[nodiscard]] Average const* operator->() const noexcept {
     return &average();
   }
 
 
   void iteration() noexcept {
-    if (++iteration_counter_ < resolution_) {
+    if (++iteration_counter_ <= resolution_) {
       return;
     }
     cut();
@@ -98,4 +98,4 @@ private:
 };
 
 
-}// namespace nut::aux
+}// namespace sim::rer

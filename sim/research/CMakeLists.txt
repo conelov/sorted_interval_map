@@ -3,19 +3,28 @@ add_subdirectory(utils)
 
 chc_target_auto_name()
 
-add_executable(${name}
-  SortedIntervalBench.cpp
-)
+function(sim_target_bench_gen name)
+  add_executable(${name}
+    SortedIntervalBench.cpp
+  )
 
-chc_target_common(${name})
-chc_target_gbench(${name} MAIN)
+  chc_target_common(${name})
+  chc_target_gbench(${name} MAIN)
 
-target_link_libraries(${name} PUBLIC
-  ${PROJECT_NAME_SHORT}-research-utils
-)
+  target_link_libraries(${name} PUBLIC
+    ${PROJECT_NAME_SHORT}-research-utils
+  )
 
-chc_cpu_count(ncpu)
-target_compile_definitions(${name} PUBLIC
-  ${PROJECT_NAME_SHORT_UP}_RESEARCH
-  ${PROJECT_NAME_SHORT_UP}_NCPU=${ncpu}
-)
+  chc_cpu_count(ncpu)
+  target_compile_definitions(${name} PUBLIC
+    ${PROJECT_NAME_SHORT_UP}_RESEARCH
+    ${PROJECT_NAME_SHORT_UP}_NCPU=${ncpu}
+  )
+endfunction()
+
+sim_target_bench_gen(${name})
+
+chc_head_variable(RESEARCH_GBENCH_SAN)
+if(RESEARCH_GBENCH_SAN)
+  chc_san_common(dummy ${name} sim_target_bench_gen)
+endif()

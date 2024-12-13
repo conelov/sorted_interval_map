@@ -63,6 +63,11 @@ public:
   using Range        = std::vector<std::pair<value_type, value_type>>;
 
 public:
+  Random()
+      : Random(Range{{std::numeric_limits<value_type>::min(), std::numeric_limits<value_type>::max()}}) {
+  }
+
+
   Random(Range a)
       : map_{merge_interval_(std::move(a))}
       , di_{calc_discrete_distribution(map_)} {

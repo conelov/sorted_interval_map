@@ -105,6 +105,15 @@ function(chc_target_itlib target)
 endfunction()
 
 
+function(chc_target_range_v3 target)
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/cpm.cmake")
+  chc_cpm_range_v3()
+  target_link_libraries(${name} PRIVATE
+    range-v3::range-v3
+  )
+endfunction()
+
+
 function(chc_target_boost target)
   include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
 
@@ -174,7 +183,7 @@ function(chc_target_qt target #[[source ...]])
 endfunction()
 
 
-function(san_common out_var suffix fn_gen)
+function(chc_san_common out_var suffix fn_gen #[[sanitizers = ${PROJECT_NAME}_SANITIZERS]])
   unset(${out_var})
   macro(asan)
     target_compile_options(${name} PRIVATE
@@ -236,9 +245,16 @@ function(san_common out_var suffix fn_gen)
     )
   endmacro()
 
-  foreach(i IN LISTS ${PROJECT_NAME_UP_CASE}_SANITIZERS)
+  if(${ARGC} GREATER 3)
+    set(SANITIZERS ${ARGV3})
+  else()
+    chc_head_variable(SANITIZERS)
+  endif()
+
+  foreach(i IN LISTS SANITIZERS)
     if("${i}" STREQUAL "address")
-      cmake_language(CALL ${fn_gen} name "${suffix}-asan")
+      set(name ${suffix}-asan)
+      cmake_language(CALL ${fn_gen} ${name})
       asan()
       list(APPEND ${out_var} ${name})
     endif()
@@ -246,35 +262,35 @@ function(san_common out_var suffix fn_gen)
     if("${i}" STREQUAL "mem")
       if(NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         message(STATUS "Memory sanitizer disabled.")
-
       else()
-        cmake_language(CALL ${fn_gen} name "${suffix}-msan")
+        set(name ${suffix}-msan)
+        cmake_language(CALL ${fn_gen} ${name})
         msan()
+        list(APPEND ${out_var} ${name})
       endif()
-      list(APPEND ${out_var} ${name})
     endif()
 
     if("${i}" STREQUAL "thread")
-      cmake_language(CALL ${fn_gen} name "${suffix}-tsan")
+      set(name ${suffix}-tsan)
+      cmake_language(CALL ${fn_gen} ${name})
       tsan()
       list(APPEND ${out_var} ${name})
     endif()
 
     if("${i}" STREQUAL "leak")
-      cmake_language(CALL ${fn_gen} name "${suffix}-lsan")
+      set(name ${suffix}-lsan)
+      cmake_language(CALL ${fn_gen} ${name})
       lsan()
       list(APPEND ${out_var} ${name})
     endif()
 
     if("${i}" STREQUAL "ub")
-      cmake_language(CALL ${fn_gen} name "${suffix}-usan")
+      set(name ${suffix}-ubsan)
+      cmake_language(CALL ${fn_gen} ${name})
       usan()
       list(APPEND ${out_var} ${name})
     endif()
   endforeach()
-
-  cmake_language(CALL ${fn_gen} name "${suffix}")
-  list(APPEND ${out_var} ${name})
 
   set(${out_var} ${${out_var}} PARENT_SCOPE)
 endfunction()

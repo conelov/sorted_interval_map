@@ -18,20 +18,26 @@
   DO_PRAGMA(clang diagnostic pop)
 
 
-#define SIM_INVOKER_AS_LAMBDA(fn, ...) [__VA_ARGS__](auto&&... args) noexcept(noexcept(fn(std::forward<decltype(args)>(args)...))) -> decltype(auto) { \
-  return fn(std::forward<decltype(args)>(args)...);                                                                                                   \
+#define SIM_MEM_FN_LAMBDA(mem, ...) [__VA_ARGS__](auto&& arg) noexcept(noexcept(std::declval<std::remove_cvref_t<std::remove_pointer_t<decltype(arg)>>>().mem)) -> decltype(auto) { \
+  if constexpr (std::is_pointer_v<decltype(arg)>) {                                                                                                                                 \
+    return std::forward<decltype(arg)>(arg)->mem;                                                                                                                                   \
+  } else {                                                                                                                                                                          \
+    return std::forward<decltype(arg)>(arg).mem;                                                                                                                                    \
+  }                                                                                                                                                                                 \
 }
 
 
-#define SIM_MEM_FN_LAMBDA(mem, ...) [__VA_ARGS__](auto&& arg) noexcept(noexcept(std::forward<decltype(arg)>(arg) mem)) -> decltype(auto) { \
-  return std::forward<decltype(arg)>(arg) mem;                                                                                            \
+#define SIM_WRAP_IN_LAMBDA(expr, ...) [__VA_ARGS__](auto&&...) constexpr noexcept(noexcept(expr)) -> void { \
+  do {                                                                                                      \
+    expr;                                                                                                   \
+  } while (false);                                                                                          \
 }
 
 
-#define SIM_WRAP_IN_LAMBDA(expr, ...) [__VA_ARGS__](auto&&...) noexcept(noexcept(expr)) -> decltype(auto) { \
-  do {                                                                                                     \
-    expr;                                                                                                  \
-  } while (false);                                                                                         \
+#define SIM_WRAP_IN_LAMBDA_R(expr, ...) [__VA_ARGS__](auto&&...) constexpr noexcept(noexcept(expr)) -> decltype(auto) { \
+  do {                                                                                                                  \
+    return expr;                                                                                                        \
+  } while (false);                                                                                                      \
 }
 
 
@@ -68,4 +74,4 @@ template<typename F>
 }
 
 
-}
+}// namespace sim

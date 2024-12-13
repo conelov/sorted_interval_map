@@ -363,3 +363,53 @@ function(chc_cpu_count out_var)
   endif()
   set(${out_var} ${${cpu_count_var}} PARENT_SCOPE)
 endfunction()
+
+
+function(chc_get_libcxx_type result_var) # TODO not working
+  set(options_keywords)
+  set(one_value_keywords UNKNOWN LIBSTDCPP LIBCPP)
+  set(multi_value_keywords)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
+
+  chc_set_if(arg_UNKNOWN EMPTY THEN "unknown")
+  set(unknown_return_code 1)
+
+  chc_set_if(arg_LIBSTDCPP EMPTY THEN "libstdc++")
+  set(libstdcpp_return_code 2)
+
+  chc_set_if(arg_LIBCPP EMPTY THEN "libc++")
+  set(libcpp_return_code 3)
+
+  set(type_var "${CMAKE_CURRENT_FUNCTION}-type")
+  if(NOT DEFINED CACHE{type_var})
+    set(bindir "${PROJECT_BINARY_DIR}/chc")
+    set(file_check_libcxx_source "${bindir}/check_libcxx.cpp")
+    file(WRITE "${file_check_libcxx_source}" "
+#ifdef __GLIBCXX__
+  int main () { return ${libstdcpp_return_code}; }
+#elif defined(_LIBCPP_VERSION)
+  int main () { return ${libcpp_return_code}; }
+#else
+  int main () { return ${unknown_return_code}; }
+#endif
+      ")
+
+    try_run(run_return_var compile_result_var ${bindir} "${file_check_libcxx_source}")
+    if(NOT compile_result_var EQUAL 0)
+      message(FATAL_ERROR " ${CMAKE_CURRENT_FUNCTION}. Failed to compile.")
+    elseif("${run_return_var}" STREQUAL "FAILED_TO_RUN")
+      message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION}. Failed to run.")
+    endif()
+    set(${type_var} ${run_return_var} CACHE INTERNAL "")
+  endif()
+
+  if(${${type_var}} EQUAL ${unknown_return_code})
+    set(${result_var} "${arg_UNKNOWN}" PARENT_SCOPE)
+  elseif(${${type_var}} EQUAL ${libstdcpp_return_code})
+    set(${result_var} "${arg_LIBSTDCPP}" PARENT_SCOPE)
+  elseif(${${type_var}} EQUAL ${arg_LIBCPP})
+    set(${result_var} "${arg_UNKNOWN}" PARENT_SCOPE)
+  else()
+    message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION}. Logic error.")
+  endif()
+endfunction()

@@ -68,6 +68,15 @@ function(chc_cpm_itlib)
 endfunction()
 
 
+function(chc_cpm_range_v3)
+  chc_head_variable(RANGE-V3_COMMIT_HASH)
+  chc_cpm(
+    NAME range-v3
+    URL https://github.com/ericniebler/range-v3/archive/${RANGE-V3_COMMIT_HASH}.tar.gz
+  )
+endfunction()
+
+
 function(chc_cpm_boost BOOST_INCLUDE_LIBRARIES)
   include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
   chc_assert_not_str_empty(BOOST_INCLUDE_LIBRARIES)
