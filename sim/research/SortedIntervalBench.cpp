@@ -5,11 +5,12 @@
 
 #include <benchmark/benchmark.h>
 
+#include <itlib/flat_set.hpp>
+
 #include <sim/SortedInterval.hpp>
 
 #include <sim/utils/functional.hpp>
-
-#include <sim/fixture/SortedInterval.hpp>
+#include <sim/utils/numeric.hpp>
 
 #include <sim/research/utils/IterationRate.hpp>
 #include <sim/research/utils/IterativeAverage.hpp>
@@ -20,7 +21,7 @@
 namespace {
 
 
-auto constexpr min_iterations = 1000uz;
+auto constexpr min_iterations = 1000u;
 std::size_t constexpr n_cpu   = SIM_NCPU;
 
 
@@ -31,6 +32,9 @@ template<typename Interval_>
 class SortedIntervalBench : public benchmark::Fixture {
 public:
   void SetUp(benchmark::State& state) override {
+    if (state.thread_index() != 0) {
+      return;
+    }
     state.counters["ist"] = counts_ = state.range(0);
   }
 
@@ -44,19 +48,31 @@ public:
   }
 
 
-  void iteration() {
-    auto& [sorted_interval, rate, rate_total] = ctxs_.raw().at(std::this_thread::get_id());
-    using RandomSource                        = rer::RandomPreviously<typename Interval_::interval_value_type>;
-    RandomSource rg{counts_ * 2};
-    rate.reset(min_iterations);
+  void iteration(benchmark::State& state) {
+    auto& [sorted_interval, rate, rate_total, elements_count] = ctxs_.raw().at(std::this_thread::get_id());
+    using interval_type                                       = typename Interval_::interval_type;
+    using interval_value_type                                 = typename Interval_::interval_value_type;
 
+    std::vector<interval_type> rand_intervals;
+    rand_intervals.reserve(counts_);
+    std::ranges::generate_n(std::back_inserter(rand_intervals), counts_, [] {
+      auto constexpr max           = std::numeric_limits<interval_value_type>::max();
+      auto constexpr min           = std::numeric_limits<interval_value_type>::min();
+      constexpr auto interval_size = 10;
+      auto const     rand_val      = rer::RandomEngine<>::number(min + interval_size, max - interval_size);
+      return interval_type{rand_val + interval_size, rand_val - interval_size};
+    });
+
+    rate.reset(min_iterations);
     for (auto i = 0uz; i < counts_; ++i) {
-      auto interval = std::pair{rg.get(), rg.get()};
+      auto interval = rand_intervals.back();
       if (interval.first > interval.second) {
         std::swap(interval.first, interval.second);
       }
       sorted_interval.emplace(std::move(interval));
       ++rate;
+      rand_intervals.pop_back();
+      elements_count += sorted_interval.size();
     }
 
     rate.cut();
@@ -72,21 +88,31 @@ public:
   }
 
 
-  void TearDown(benchmark::State& st) override {
-    namespace rv                   = std::views;
-    auto       aves                = ctxs_.raw() | rv::transform(SIM_MEM_FN_LAMBDA(second.rate_total));
-    auto const rate                = std::ranges::fold_left(aves | std::views::drop(1), *aves.begin(), [](auto&& acc, auto&& v) {
-      return acc += v.average();
+  void TearDown(benchmark::State& state) override {
+    if (state.thread_index() != 0) {
+      return;
+    }
+    namespace rv                     = std::views;
+    auto       aves                  = ctxs_.raw() | rv::transform([](auto&& ctx) {
+      return &ctx.second;
     });
-    st.counters["rate_per_µs"]     = rate.average().count();
-    st.counters["rate_max_per_µs"] = rate.min_max().max.count();
+    auto const ave                   = std::ranges::fold_left(aves | std::views::drop(1), *aves.begin(), [](auto&& acc, auto&& v) {
+      acc->rate_total += v->rate_total;
+      acc->elements_count += v->elements_count;
+      return acc;
+    });
+    state.counters["it_time_ns"]     = ave->rate_total.average().count();
+    state.counters["it_time_max_ns"] = ave->rate_total.min_max().max.count();
+    state.counters["elements_n_ave"] = ave->elements_count.average();
+    state.counters["elements_n_max"] = ave->elements_count.min_max().max;
   }
 
 private:
   struct ThreadContext final {
-    Interval_                                       sorted_interval;
-    rer::IterationRate<std::micro>                  rate;
-    rer::IterativeAverage<decltype(rate)::Duration> rate_total;
+    Interval_                                                sorted_interval;
+    rer::IterationRate<std::nano>                            rate;
+    rer::IterativeAverage<typename decltype(rate)::Duration> rate_total;
+    rer::IterativeAverage<>                                  elements_count;
   };
 
 private:
@@ -96,13 +122,15 @@ private:
 
 
 void generate_dependent_args(benchmark::internal::Benchmark* b) {
-  for (auto const its : {1'000, 10'000, 100'000}) {
-    b->Args({its});
+  for (auto const multi : {1u, 100u, 10'000u}) {
+    b->Args({min_iterations * multi});
   }
 }
 
 
-using StdTrivial = SortedInterval<int, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::trivial>;
+using StdTrivial        = SortedInterval<std::int16_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::trivial>;
+using StdOptimizedErase = SortedInterval<std::int16_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::optimized_erase>;
+using FlatTrivial       = SortedInterval<std::int16_t, std::less, itlib::flat_set, std::vector, std::pair, SortedIntervalImplType::trivial>;
 
 
 }// namespace
@@ -113,7 +141,7 @@ using StdTrivial = SortedInterval<int, std::less, std::set, std::allocator, std:
     entered();                                                                                       \
     for (auto _ : state) {                                                                           \
       pre_iteration();                                                                               \
-      iteration();                                                                                   \
+      iteration(state);                                                                              \
       post_iteration();                                                                              \
     }                                                                                                \
     exited();                                                                                        \
@@ -123,5 +151,6 @@ using StdTrivial = SortedInterval<int, std::less, std::set, std::allocator, std:
     ->Unit(benchmark::kMillisecond)                                                                  \
     ->Threads(n_cpu)
 
-
 SIM_BENCH(StdTrivial);
+SIM_BENCH(StdOptimizedErase);
+SIM_BENCH(FlatTrivial);

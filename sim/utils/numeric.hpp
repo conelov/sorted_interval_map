@@ -5,10 +5,11 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
+#include <limits>
 #include <optional>
 #include <ranges>
 #include <type_traits>
-#include <functional>
 
 
 namespace sim {
@@ -71,9 +72,9 @@ constexpr bool in_range(T t) noexcept {
 }
 
 
-template<typename T, typename U>
+template<typename U, typename T>
 requires std::is_integral_v<T> && std::is_integral_v<U>
-[[deprecated("unsafe")]] auto val_map(T x, T in_min, T in_max, U out_min, U out_max) {
+[[nodiscard]] [[deprecated("unsafe")]] auto val_map(T x, U out_min = std::numeric_limits<U>::min(), U out_max = std::numeric_limits<U>::max(), T in_min = std::numeric_limits<T>::min(), T in_max = std::numeric_limits<T>::max()) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 

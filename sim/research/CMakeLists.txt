@@ -10,6 +10,7 @@ function(sim_target_bench_gen name)
 
   chc_target_common(${name})
   chc_target_gbench(${name} MAIN)
+  chc_target_itlib(${name})
 
   target_link_libraries(${name} PUBLIC
     ${PROJECT_NAME_SHORT}-research-utils

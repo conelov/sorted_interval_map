@@ -49,7 +49,7 @@ public:
 
 
   void iteration() noexcept {
-    if (++iteration_counter_ <= resolution_) {
+    if (++iteration_counter_ < resolution_) {
       return;
     }
     cut();
@@ -62,7 +62,7 @@ public:
       return;
     }
     assert(resolution_ > 0 && "not initialized");
-    ir_ += (time_prev_ - start) * iteration_counter_ / static_cast<Rep>(resolution_);
+    ir_ += (time_prev_ - start) / static_cast<Rep>(iteration_counter_);
     iteration_counter_ = 0;
   }
 
