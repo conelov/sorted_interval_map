@@ -17,6 +17,7 @@ chc_head_define_variable(STRING BOOST_VERSION 1.87.0)
 chc_head_define_variable(STRING ITLIB_VERSION 1.11.4)
 chc_head_define_variable(STRING RANGE-V3_COMMIT_HASH 7e6f34b1e820fb8321346888ef0558a0ec842b8e)
 chc_head_define_variable(BOOL RESEARCH ON)
+chc_head_define_variable(BOOL RESEARCH_BENCH_INTERVAL_MAP_BIG OFF)
 chc_head_define_variable(BOOL RESEARCH_GBENCH_SAN OFF "Use sanitizers for benchmarking")
 
 if(PROJECT_IS_TOP_LEVEL)

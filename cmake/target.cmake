@@ -85,7 +85,7 @@ function(chc_target_gbench target)
   include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
 
   set(options_keywords MAIN LOG)
-  set(one_value_keywords RUN LOG_PATH)
+  set(one_value_keywords RUN LOG_PATH LOG_DIR)
   set(multi_value_keywords)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
 
@@ -100,8 +100,11 @@ function(chc_target_gbench target)
     chc_set_if(arg_RUN EMPTY THEN "${target}-bench")
 
     set(benchmark_out_cmd "")
-    if(arg_LOG)
-      set(benchmark_out_cmd "${CMAKE_CURRENT_BINARY_DIR}/${arg_RUN}_log.txt")
+    if(arg_LOG OR NOT "${arg_LOG_PATH}" STREQUAL "")
+      chc_set_if(arg_LOG_PATH EMPTY THEN "${CMAKE_CURRENT_BINARY_DIR}")
+      string(TIMESTAMP timestamp)
+      set(log_file_name "${arg_RUN}_log_${timestamp}.txt")
+      set(benchmark_out_cmd "${arg_LOG_PATH}/${log_file_name}")
     endif()
     chc_set_if(arg_LOG_PATH NOT EMPTY SET benchmark_out_cmd)
     if(NOT "${benchmark_out_cmd}" STREQUAL "")
@@ -113,6 +116,7 @@ function(chc_target_gbench target)
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
       COMMAND_EXPAND_LISTS
       VERBATIM
+      USES_TERMINAL
     )
     add_dependencies(${arg_RUN} ${target})
   endif()
