@@ -99,25 +99,31 @@ function(chc_target_gbench target)
   if(NOT "${arg_RUN}" STREQUAL "" OR "${arg_KEYWORDS_MISSING_VALUES}" MATCHES "RUN")
     chc_set_if(arg_RUN EMPTY THEN "${target}-bench")
 
-    set(benchmark_out_cmd "")
-    if(arg_LOG OR NOT "${arg_LOG_PATH}" STREQUAL "")
-      chc_set_if(arg_LOG_PATH EMPTY THEN "${CMAKE_CURRENT_BINARY_DIR}")
+    set(output_file_cmd "")
+    if(arg_LOG OR NOT "${arg_LOG_DIR}" STREQUAL "")
+      chc_set_if(arg_LOG_DIR EMPTY THEN "${CMAKE_CURRENT_BINARY_DIR}")
       string(TIMESTAMP timestamp)
       set(log_file_name "${arg_RUN}_log_${timestamp}.txt")
-      set(benchmark_out_cmd "${arg_LOG_PATH}/${log_file_name}")
+      set(output_file_cmd "${arg_LOG_DIR}/${log_file_name}")
     endif()
-    chc_set_if(arg_LOG_PATH NOT EMPTY SET benchmark_out_cmd)
-    if(NOT "${benchmark_out_cmd}" STREQUAL "")
-      set(benchmark_out_cmd "--benchmark_out=${benchmark_out_cmd}")
+    chc_set_if(arg_LOG_PATH NOT EMPTY SET output_file_cmd)
+    if(NOT "${output_file_cmd}" STREQUAL "")
+      get_filename_component(output_dir "${output_file_cmd}" DIRECTORY)
+      set(output_dir_cmd "COMMAND \"${CMAKE_COMMAND}\" -E make_directory \"${output_dir}\"")
+      set(benchmark_out_cmd "--benchmark_out=${output_file_cmd}")
+      set(byproducts_output_file_cmd "BYPRODUCTS \"${output_file_cmd}\"")
     endif()
 
+    cmake_language(EVAL CODE "
     add_custom_target(${arg_RUN}
-      "$<TARGET_FILE:${target}>" --benchmark_out_format=console --benchmark_counters_tabular=true ${benchmark_out_cmd}
-      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    ${output_dir_cmd}
+      COMMAND \"$<TARGET_FILE:${target}>\" --benchmark_out_format=console --benchmark_counters_tabular=true ${benchmark_out_cmd}
+      WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}\"
+      ${byproducts_output_file_cmd}
       COMMAND_EXPAND_LISTS
       VERBATIM
       USES_TERMINAL
-    )
+    )")
     add_dependencies(${arg_RUN} ${target})
   endif()
 endfunction()

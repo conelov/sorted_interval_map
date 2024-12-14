@@ -1,4 +1,7 @@
 #ifdef SIM_RESEARCH
+  #include <deque>
+  #include <vector>
+
   #include <itlib/flat_set.hpp>
 #endif
 
@@ -11,7 +14,7 @@
 
 
 template<typename SortedInterval_>
-class SortedIntervalTest
+class SortedInterval
     : public ::testing::Test
     , public sim::fix::SortedInterval<SortedInterval_> {
 protected:
@@ -27,15 +30,15 @@ using Types = ::testing::Types<
   sim::SortedInterval<int, std::less, std::set, std::allocator, std::pair, sim::SortedIntervalImplType::optimized_erase>
 #ifdef SIM_RESEARCH
   , sim::SortedInterval<int, std::less, itlib::flat_set, std::vector, std::pair, sim::SortedIntervalImplType::trivial>
-  // , sim::SortedInterval<int, std::less, itlib::flat_set, std::vector, std::pair, sim::SortedIntervalImplType::optimized_erase>
+  , sim::SortedInterval<int, std::less, itlib::flat_set, std::deque, std::pair, sim::SortedIntervalImplType::trivial>
 #endif
 >;
 // clang-format on
 
-TYPED_TEST_SUITE(SortedIntervalTest, Types);
+TYPED_TEST_SUITE(SortedInterval, Types);
 
 
-TYPED_TEST(SortedIntervalTest, smoke) {
+TYPED_TEST(SortedInterval, smoke) {
   {
     typename decltype(this->sorted_interval)::container_type::const_iterator it;
     it = this->sorted_interval.emplace(std::pair{1, 1});

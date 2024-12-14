@@ -1,0 +1,37 @@
+2024-12-14T07:11:05+03:00
+Running /home/dym/CLionProjects/sorted_interval_map/cmake-build-release-clang-19/sim/research/sim-research
+Run on (24 X 5159.77 MHz CPU s)
+CPU Caches:
+  L1 Data 32 KiB (x12)
+  L1 Instruction 32 KiB (x12)
+  L2 Unified 512 KiB (x12)
+  L3 Unified 32768 KiB (x2)
+Load Average: 1.50, 1.18, 1.89
+***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Benchmark                                                                                   Time             CPU   Iterations elements_n elements_n_max        ist it_time_max_ns it_time_ns
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+SortedIntervalBench<StdTrivial>/StdTrivial/1000/threads:24                              0.058 ms        0.056 ms        10776    19.3363           1.2k         1k         148.81     43.753
+SortedIntervalBench<StdTrivial>/StdTrivial/100000/threads:24                             5.81 ms         5.80 ms          120    9.85199           1.2k       100k         148.81    43.7122
+SortedIntervalBench<StdTrivial>/StdTrivial/10000000/threads:24                            590 ms          584 ms           24     1.9201           1.2k        10M         148.81       43.7
+SortedIntervalBench<StdOptimizedErase>/StdOptimizedErase/1000/threads:24                0.035 ms        0.034 ms        17280    13.2282         1.194k         1k         134.51    23.1546
+SortedIntervalBench<StdOptimizedErase>/StdOptimizedErase/100000/threads:24               3.58 ms         3.57 ms          240    6.26238         1.194k       100k         134.51    23.1389
+SortedIntervalBench<StdOptimizedErase>/StdOptimizedErase/10000000/threads:24              398 ms          378 ms           24     1.8517         1.194k        10M         134.51    23.1375
+SortedIntervalBench<Flat>/Flat/1000/threads:24                                          0.029 ms        0.029 ms        24576    7.61251         1.175k         1k       1.92146k    19.9012
+SortedIntervalBench<Flat>/Flat/10000/threads:24                                         0.279 ms        0.277 ms         2664    4.68428         1.175k        10k       1.92146k     19.591
+SortedIntervalBench<Flat>/Flat/100000/threads:24                                         2.91 ms         2.90 ms          312    3.44289         1.175k       100k       1.92146k    19.5413
+SortedIntervalBench<FlatDeque>/FlatDeque/1000/threads:24                                 4.74 ms         4.72 ms          432   14.4984k        28.995k         1k       6.54969k   3.50686k
+SortedIntervalBench<FlatDeque>/FlatDeque/10000/threads:24                                72.7 ms         72.0 ms           24   19.4976k        38.993k        10k       7.81871k   3.64205k
+SortedIntervalBench<FlatDeque>/FlatDeque/100000/threads:24                               2073 ms         2053 ms           24   69.4599k       138.872k       100k       21.2332k   4.20203k
+SortedIntervalBench<StdTrivialBig>/StdTrivialBig/1000/threads:24                        0.651 ms        0.632 ms         2472   56.9677k       113.913k         1k       1.57596k    625.987
+SortedIntervalBench<StdTrivialBig>/StdTrivialBig/100000/threads:24                       73.8 ms         72.6 ms           24     106.9k       213.711k       100k       1.57596k    627.114
+SortedIntervalBench<StdTrivialBig>/StdTrivialBig/10000000/threads:24                    16413 ms        15805 ms           24    4.8947M       9.58236M        10M       1.60703k    635.619
+SortedIntervalBench<StdOptimizedEraseBig>/StdOptimizedEraseBig/1000/threads:24          0.603 ms        0.563 ms         1920   45.4803k        90.941k         1k       1.30171k    553.865
+SortedIntervalBench<StdOptimizedEraseBig>/StdOptimizedEraseBig/100000/threads:24         77.6 ms         70.4 ms           24    95.419k       190.756k       100k       1.30171k    555.918
+SortedIntervalBench<StdOptimizedEraseBig>/StdOptimizedEraseBig/10000000/threads:24      16540 ms        15970 ms           24   4.88456M       9.56346M        10M        1.6358k    567.508
+SortedIntervalBench<FlatBig>/FlatBig/1000/threads:24                                     4.44 ms         4.41 ms          240   5.50018k        10.999k         1k       7.66486k   4.05614k
+SortedIntervalBench<FlatBig>/FlatBig/10000/threads:24                                    86.2 ms         85.8 ms           24   10.4996k        20.998k        10k       8.05637k   4.42069k
+SortedIntervalBench<FlatBig>/FlatBig/100000/threads:24                                   4116 ms         4080 ms           24    60.473k       120.909k       100k       41.9492k   7.26541k
+SortedIntervalBench<FlatDequeBig>/FlatDequeBig/1000/threads:24                           4.93 ms         4.92 ms          456   14.9994k        29.996k         1k       6.94466k   3.66919k
+SortedIntervalBench<FlatDequeBig>/FlatDequeBig/10000/threads:24                          74.7 ms         74.4 ms           24    19.998k        39.992k        10k       7.40773k     3.791k
+SortedIntervalBench<FlatDequeBig>/FlatDequeBig/100000/threads:24                         2148 ms         2048 ms           24   69.9584k       139.886k       100k       20.4453k   4.32575k

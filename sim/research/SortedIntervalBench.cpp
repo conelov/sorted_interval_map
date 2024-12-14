@@ -1,4 +1,5 @@
 #include <chrono>
+#include <deque>
 #include <ranges>
 #include <thread>
 #include <vector>
@@ -131,29 +132,22 @@ private:
 };
 
 
-void generate_dependent_args(benchmark::internal::Benchmark* b) {
-  for (auto const multi : {1u, 100u, 10'000u}) {
-    b->Args({min_iterations * multi});
-  }
-}
-
-
 using StdTrivial        = SortedInterval<std::int16_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::trivial>;
 using StdOptimizedErase = SortedInterval<std::int16_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::optimized_erase>;
-using FlatTrivial       = SortedInterval<std::int16_t, std::less, itlib::flat_set, std::vector, std::pair, SortedIntervalImplType::trivial>;
+using Flat              = SortedInterval<std::int16_t, std::less, itlib::flat_set, std::vector, std::pair, SortedIntervalImplType::trivial>;
+using FlatDeque         = sim::SortedInterval<int, std::less, itlib::flat_set, std::deque, std::pair, sim::SortedIntervalImplType::trivial>;
 
 
 using StdTrivialBig        = SortedInterval<std::int32_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::trivial>;
 using StdOptimizedEraseBig = SortedInterval<std::int32_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::optimized_erase>;
-#ifdef SIM_RESEARCH_BENCH_INTERVAL_MAP_BIG
-using FlatTrivialBig = SortedInterval<std::int32_t, std::less, itlib::flat_set, std::vector, std::pair, SortedIntervalImplType::trivial>;
-#endif
+using FlatBig              = SortedInterval<std::int32_t, std::less, itlib::flat_set, std::vector, std::pair, SortedIntervalImplType::trivial>;
+using FlatDequeBig         = sim::SortedInterval<int, std::less, itlib::flat_set, std::deque, std::pair, sim::SortedIntervalImplType::trivial>;
 
 
 }// namespace
 
 
-#define SIM_BENCH(name_type)                                                                         \
+#define SIM_BENCH(name_type, ...)                                                                    \
   BENCHMARK_TEMPLATE_DEFINE_F(SortedIntervalBench, name_type, name_type)(benchmark::State & state) { \
     entered();                                                                                       \
     for (auto _ : state) {                                                                           \
@@ -163,18 +157,23 @@ using FlatTrivialBig = SortedInterval<std::int32_t, std::less, itlib::flat_set, 
     }                                                                                                \
     exited();                                                                                        \
   }                                                                                                  \
+  void generate_dependent_args_##name_type(benchmark::internal::Benchmark* b) {                      \
+    for (auto const multi : {__VA_ARGS__}) {                                                         \
+      b->Args({min_iterations * multi});                                                             \
+    }                                                                                                \
+  }                                                                                                  \
   BENCHMARK_REGISTER_F(SortedIntervalBench, name_type)                                               \
-    ->Apply(generate_dependent_args)                                                                 \
+    ->Apply(generate_dependent_args_##name_type)                                                     \
     ->Unit(benchmark::kMillisecond)                                                                  \
     ->Threads(n_cpu)
 
 
-SIM_BENCH(StdTrivial);
-SIM_BENCH(StdOptimizedErase);
-SIM_BENCH(FlatTrivial);
+SIM_BENCH(StdTrivial, 1, 100, 10'000);
+SIM_BENCH(StdOptimizedErase, 1, 100, 10'000);
+SIM_BENCH(Flat, 1, 10, 100);
+SIM_BENCH(FlatDeque, 1, 10, 100);
 
-SIM_BENCH(StdTrivialBig);
-SIM_BENCH(StdOptimizedEraseBig);
-#ifdef SIM_RESEARCH_BENCH_INTERVAL_MAP_BIG
-SIM_BENCH(FlatTrivialBig);
-#endif
+SIM_BENCH(StdTrivialBig, 1, 100, 10'000);
+SIM_BENCH(StdOptimizedEraseBig, 1, 100, 10'000);
+SIM_BENCH(FlatBig, 1, 10, 100);
+SIM_BENCH(FlatDequeBig, 1, 10, 100);

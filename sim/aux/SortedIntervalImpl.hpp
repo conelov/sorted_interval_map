@@ -35,7 +35,7 @@ struct SortedIntervalSetBased<SortedIntervalImplType::trivial> {
   constexpr auto emplace_impl(auto& intervals, auto&& in) {
     auto& [start, end] = in;
     assert(start <= end);
-    auto it            = intervals.lower_bound(start);
+    auto it = intervals.lower_bound(start);
     if (it != intervals.begin() && std::prev(it)->second >= start) {
       --it;
     }

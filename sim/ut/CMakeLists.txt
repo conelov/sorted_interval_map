@@ -15,9 +15,12 @@ target_link_libraries(${name} PRIVATE
   ${PROJECT_NAME_SHORT}-fixture
 )
 
-target_compile_definitions(${name} PRIVATE
-  ${PROJECT_NAME_SHORT_UP}_RESEARCH
-)
+chc_head_variable(RESEARCH)
+if(RESEARCH)
+  target_compile_definitions(${name} PRIVATE
+    ${PROJECT_NAME_SHORT_UP}_RESEARCH
+  )
+endif()
 
 chc_target_common(${name})
 chc_target_gtest(${name} MOCK_MAIN)
