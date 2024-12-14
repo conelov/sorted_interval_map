@@ -82,8 +82,10 @@ endfunction()
 
 
 function(chc_target_gbench target)
-  set(options_keywords MAIN)
-  set(one_value_keywords)
+  include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/utils.cmake")
+
+  set(options_keywords MAIN LOG)
+  set(one_value_keywords RUN LOG_PATH)
   set(multi_value_keywords)
   cmake_parse_arguments(PARSE_ARGV 1 arg "${options_keywords}" "${one_value_keywords}" "${multi_value_keywords}")
 
@@ -93,6 +95,27 @@ function(chc_target_gbench target)
     benchmark::benchmark
     $<$<BOOL:${arg_MAIN}>:benchmark::benchmark_main>
   )
+
+  if(NOT "${arg_RUN}" STREQUAL "" OR "${arg_KEYWORDS_MISSING_VALUES}" MATCHES "RUN")
+    chc_set_if(arg_RUN EMPTY THEN "${target}-bench")
+
+    set(benchmark_out_cmd "")
+    if(arg_LOG)
+      set(benchmark_out_cmd "${CMAKE_CURRENT_BINARY_DIR}/${arg_RUN}_log.txt")
+    endif()
+    chc_set_if(arg_LOG_PATH NOT EMPTY SET benchmark_out_cmd)
+    if(NOT "${benchmark_out_cmd}" STREQUAL "")
+      set(benchmark_out_cmd "--benchmark_out=${benchmark_out_cmd}")
+    endif()
+
+    add_custom_target(${arg_RUN}
+      "$<TARGET_FILE:${target}>" --benchmark_out_format=console --benchmark_counters_tabular=true ${benchmark_out_cmd}
+      WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+      COMMAND_EXPAND_LISTS
+      VERBATIM
+    )
+    add_dependencies(${arg_RUN} ${target})
+  endif()
 endfunction()
 
 
