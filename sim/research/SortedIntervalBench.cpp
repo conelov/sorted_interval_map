@@ -138,10 +138,12 @@ using Flat              = SortedInterval<std::int16_t, std::less, itlib::flat_se
 using FlatDeque         = sim::SortedInterval<int, std::less, itlib::flat_set, std::deque, std::pair, sim::SortedIntervalImplType::trivial>;
 
 
+#ifdef SIM_RESEARCH_SORTED_INTERVAL_INT32
 using StdTrivialBig        = SortedInterval<std::int32_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::trivial>;
 using StdOptimizedEraseBig = SortedInterval<std::int32_t, std::less, std::set, std::allocator, std::pair, SortedIntervalImplType::optimized_erase>;
 using FlatBig              = SortedInterval<std::int32_t, std::less, itlib::flat_set, std::vector, std::pair, SortedIntervalImplType::trivial>;
 using FlatDequeBig         = sim::SortedInterval<int, std::less, itlib::flat_set, std::deque, std::pair, sim::SortedIntervalImplType::trivial>;
+#endif
 
 
 }// namespace
@@ -173,7 +175,9 @@ SIM_BENCH(StdOptimizedErase, 1, 100, 10'000);
 SIM_BENCH(Flat, 1, 10, 100);
 SIM_BENCH(FlatDeque, 1, 10, 100);
 
+#ifdef SIM_RESEARCH_SORTED_INTERVAL_INT32
 SIM_BENCH(StdTrivialBig, 1, 100, 10'000);
 SIM_BENCH(StdOptimizedEraseBig, 1, 100, 10'000);
 SIM_BENCH(FlatBig, 1, 10, 100);
 SIM_BENCH(FlatDequeBig, 1, 10, 100);
+#endif

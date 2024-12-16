@@ -16,10 +16,12 @@ function(sim_target_bench_gen name)
     ${PROJECT_NAME_SHORT}-research-utils
   )
 
-  chc_cpu_count(ncpu)
+  chc_head_variable(RESEARCH_SORTED_INTERVAL_INT32)
+  chc_host_cpu_count(ncpu)
   target_compile_definitions(${name} PUBLIC
     ${PROJECT_NAME_SHORT_UP}_RESEARCH
     ${PROJECT_NAME_SHORT_UP}_NCPU=${ncpu}
+    $<$<BOOL:${RESEARCH_SORTED_INTERVAL_INT32}>:${PROJECT_NAME_SHORT_UP}_RESEARCH_SORTED_INTERVAL_INT32>
   )
 endfunction()
 

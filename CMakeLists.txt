@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 
 include(cmake/head.cmake)
+include(cmake/utils.cmake)
 chc_project(sorted_interval_map
   SHORT_NAME sim
   LANGUAGES CXX
@@ -16,8 +17,11 @@ chc_head_define_variable(STRING GBENCH_VERSION 1.9.0)
 chc_head_define_variable(STRING BOOST_VERSION 1.87.0)
 chc_head_define_variable(STRING ITLIB_VERSION 1.11.4)
 chc_head_define_variable(STRING RANGE-V3_COMMIT_HASH 7e6f34b1e820fb8321346888ef0558a0ec842b8e)
-chc_head_define_variable(BOOL RESEARCH OFF)
+chc_head_define_variable(BOOL RESEARCH ${PROJECT_IS_TOP_LEVEL})
 chc_head_define_variable(BOOL RESEARCH_GBENCH_SAN OFF "Use sanitizers for benchmarking")
+
+chc_host_memory_physical_size(mem_size)
+chc_head_define_variable(BOOL RESEARCH_SORTED_INTERVAL_INT32 $<VERSION_GREATER_EQUAL:${mem_size},32768>)
 
 if(PROJECT_IS_TOP_LEVEL)
   chc_head_define_variable(STRING SANITIZERS "address;thread;ub;leak;mem" "Add this sanitizers per targets. [address;thread;ub;leak;mem]")
