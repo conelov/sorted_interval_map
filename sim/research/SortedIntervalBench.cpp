@@ -1,6 +1,5 @@
 #include <chrono>
 #include <deque>
-#include <ranges>
 #include <thread>
 #include <vector>
 
@@ -65,7 +64,7 @@ public:
     });
 
     rate.reset(min_iterations);
-    for (auto i = 0uz; i < counts_; ++i) {
+    for (std::size_t i = 0; i < counts_; ++i) {
       auto interval = rand_intervals.back();
       if (interval.first > interval.second) {
         std::swap(interval.first, interval.second);
@@ -99,7 +98,7 @@ public:
       return &ctx.second.metric;
     });
 
-    Metric const metric = std::ranges::fold_left(metrics_view | rv::drop(1), Metric{**metrics_view.begin()}, [](auto&& acc, auto&& v) {
+    Metric const metric = std::accumulate(std::next(metrics_view.begin()), metrics_view.end(), Metric{**metrics_view.begin()}, [](auto&& acc, auto&& v) {
       acc.rate += v->rate;
       acc.elements_count += v->elements_count;
       return acc;

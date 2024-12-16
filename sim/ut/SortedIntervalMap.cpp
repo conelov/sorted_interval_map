@@ -1,4 +1,3 @@
-#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
 #include <sim/SortedIntervalMap.hpp>

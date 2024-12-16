@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.22.1)
 
 include(cmake/head.cmake)
 include(cmake/utils.cmake)
@@ -8,7 +8,7 @@ chc_project(sorted_interval_map
   VERSION 0.1
 )
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(BUILD_TESTING "Enable testing" ${PROJECT_IS_TOP_LEVEL})
 
@@ -22,15 +22,12 @@ chc_head_define_variable(BOOL RESEARCH_GBENCH_SAN OFF "Use sanitizers for benchm
 
 chc_host_memory_physical_size(mem_size)
 chc_head_define_variable(BOOL RESEARCH_SORTED_INTERVAL_INT32 $<VERSION_GREATER_EQUAL:${mem_size},32768>)
-
-if(PROJECT_IS_TOP_LEVEL)
-  chc_head_define_variable(STRING SANITIZERS "address;thread;ub;leak;mem" "Add this sanitizers per targets. [address;thread;ub;leak;mem]")
-endif()
+chc_head_define_variable(STRING SANITIZERS "" "Add this sanitizers per targets. [address;thread;ub;leak;mem]")
 
 if(BUILD_TESTING)
   chc_head_variable(SANITIZERS)
   if(NOT "${SANITIZERS}" STREQUAL "" AND NOT BUILD_SHARED_LIBS)
-    message(STATUS "BUILD_SHARED_LIBS needed for sanitize. Forced enabled.")
+    message(STATUS "BUILD_SHARED_LIBS needed for sanitize: ${SANITIZERS}. Forced enabled.")
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
   endif()
   enable_testing()

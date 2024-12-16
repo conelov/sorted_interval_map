@@ -23,4 +23,4 @@ if(RESEARCH)
 endif()
 
 chc_target_common(${name})
-chc_target_gtest(${name} MOCK_MAIN)
+chc_target_gtest(${name} MAIN)

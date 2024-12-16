@@ -141,10 +141,10 @@ private:
 
 public:
   RandomPreviously(std::size_t count, auto&&... args)
-      : values_{[count, ... args = std::forward<decltype(args)>(args)] mutable -> Values {
+      : values_{[count, ... args = std::forward<decltype(args)>(args)]() mutable -> Values {
         Values out;
         out.reserve(count);
-        std::ranges::generate_n(std::back_inserter(out), count, [rd = RandomSource{std::move(args)...}] mutable {
+        std::ranges::generate_n(std::back_inserter(out), count, [rd = RandomSource{std::move(args)...}]() mutable {
           return rd.get();
         });
         return out;

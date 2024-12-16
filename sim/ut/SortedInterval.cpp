@@ -5,7 +5,6 @@
   #include <itlib/flat_set.hpp>
 #endif
 
-#include <gmock/gmock-matchers.h>
 #include <gtest/gtest.h>
 
 #include <sim/SortedInterval.hpp>
